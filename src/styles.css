@@ -1,1 +1,47 @@
-/* You can add global styles to this file, and also import other style files */
+body{
+    background-color: var(--bg-dark);
+}
+
+#actions .btn{
+    height:40px;
+    align-items: center;
+    text-transform: uppercase;
+}
+
+.tooltip-grp{
+    position: relative;
+}
+
+.tooltip-btn{}
+
+.tooltip-grp > .tooltip-dropdown{
+    position: absolute;
+    width: 120px;
+    top: 60%;
+    left: 30%;
+    display: none;
+    padding: 5px 0;
+    z-index:1;
+    border-radius: 20px;
+}
+
+
+
+.tooltip-btn:hover + .tooltip-dropdown{
+    display: block;
+}
+
+.tooltip-btn:hover + .tooltip-dropdown::after{
+    content: " ";
+    position: absolute;
+    top: -5px;
+    left: 5px;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent var(--bs-secondary) transparent;
+}
+
+.tooltip-dropdown:hover{
+    display: block;
+}

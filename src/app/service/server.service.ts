@@ -11,12 +11,12 @@ import { Status } from '../enums/status.enum';
 })
 export class ServerService {
 
-  private readonly apiUrl: string = "http://localhost:8080";
+  public readonly apiUrl: string = "http://localhost:8080/";
 
   constructor(private http: HttpClient) { }
 
   servers$: Observable<AppResponse>
-    = this.http.get<AppResponse>(`${this.apiUrl}/servers/list`)
+    = this.http.get<AppResponse>(`${this.apiUrl}servers/list`)
       .pipe(
         tap(console.log),
         catchError(this.handleError)
@@ -25,7 +25,7 @@ export class ServerService {
   save$: (value: Server) => Observable<AppResponse>
     = (server: Server) => {
       return <Observable<AppResponse>>
-        this.http.post<AppResponse>(`${this.apiUrl}/servers/save`, server)
+        this.http.post<AppResponse>(`${this.apiUrl}servers/save`, server)
           .pipe(
             tap(console.log),
             catchError(this.handleError)
@@ -35,7 +35,7 @@ export class ServerService {
   ping$: (value: string) => Observable<AppResponse>
     = (ipAddress: string) => {
       return <Observable<AppResponse>>
-        this.http.get(`${this.apiUrl}/servers/ping/${ipAddress}`)
+        this.http.get(`${this.apiUrl}servers/ping/${ipAddress}`)
           .pipe(
             tap(console.log),
             catchError(this.handleError)
@@ -44,7 +44,7 @@ export class ServerService {
 
   delete$: (id: number) => Observable<AppResponse>
     = (id: number) => {
-      return this.http.delete<AppResponse>(`${this.apiUrl}/servers/delete/${id}`)
+      return this.http.delete<AppResponse>(`${this.apiUrl}servers/delete/${id}`)
         .pipe(
           tap(console.log),
           catchError(this.handleError)
