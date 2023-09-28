@@ -2,7 +2,7 @@
     <div class="row justify-content-md-between justify-content-center">
 
         <a type="button" href="#addServer" class="col-12 col-md m-2 btn btn-primary" aria-label="Add Server"
-            data-bs-toggle="modal" >
+            data-bs-toggle="modal">
             Add Server &nbsp;
             <i class="bi bi-plus-circle"></i>
         </a>
@@ -31,10 +31,47 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Modal body text goes here.</p>
+                <form>
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            <input id="ipAddress" name="ipAddress" class="form-control" required placeholder="IP Address"/>
+                            <label aria-label="IP Address" for="ipAddress">IP</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input id="name" name="name" class="form-control" required placeholder="Name"/>
+                            <label aria-label="Server Name" for="name">Name</label>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                                <div class="form-floating">
+                                    <input id="memory" name="memory" class="form-control" required placeholder="Memory eg 10GB"/>
+                                    <label aria-label="Memory" for="memory">Memory</label>
+                                </div>
+
+                            </div>
+                            <div class="col-6">
+                                <div class="form-floating">
+                                    <input id="type" name="type" class="form-control" required placeholder="Type" />
+                                    <label aria-label="Type" for="type">Type</label>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="form-floating mb-3">
+                        <select id="modal-select-status" name="modal-select-status"
+                            class="form-select dropdown dropdown-toggle" required>
+                            <option class="dropdown-item" value="SERVER_UP">SERVER UP</option>
+                            <option class="dropdown-item" value="SERVER_DOWN">SERVER DOWN</option>
+                        </select>
+                        <label aria-label="Status" for="modal-select-status">Status</label>
+                    </div>
+                </form>
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-outline-primary">Save changes</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
