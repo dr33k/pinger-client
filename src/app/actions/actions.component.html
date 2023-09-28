@@ -1,0 +1,42 @@
+<div id="actions" class="col-12 mb-5" aria-label="Actions for Table">
+    <div class="row justify-content-md-between justify-content-center">
+
+        <a type="button" href="#addServer" class="col-12 col-md m-2 btn btn-primary" aria-label="Add Server"
+            data-bs-toggle="modal" >
+            Add Server &nbsp;
+            <i class="bi bi-plus-circle"></i>
+        </a>
+        <span class="col-12 col-md m-2 dropdown p-0">
+            <select class="btn btn-primary dropdown-toggle w-100" name="filter" aria-label="FILTER BY STATUS"
+                aria-haspopup="listbox">
+                <option class="dropdown-item" value="ALL">ALL</option>
+                <option class="dropdown-item" value="SERVER_UP">SERVER UP</option>
+                <option class="dropdown-item" value="SERVER_DOWN">SERVER DOWN</option>
+            </select>
+        </span>
+        <button class="col-12 col-md m-2 btn btn-primary" aria-label="Print Server Report">
+            Print Report &nbsp;
+            <i class="bi bi-printer"></i>
+        </button>
+    </div>
+</div>
+
+<div id="addServer" class="modal fade">
+    <div class="modal-dialog" role="alert">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Server</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

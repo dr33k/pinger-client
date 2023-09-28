@@ -1,0 +1,55 @@
+<ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState.toString()">
+    <ng-container *ngSwitchCase="'LOADING_STATE'">
+        <div class="spinner-border text-info text-center"></div>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'LOADED_STATE'">
+        <div class="col-12">
+            <table id="servers" class="table border table-striped table-hover">
+                <thead class="container">
+                    <tr class="row">
+                        <th class="col-1"></th>
+                        <th class="col-2">Name</th>
+                        <th class="col-3">IP Address</th>
+                        <th class="col-2">Type</th>
+                        <th class="col-1">Memory</th>
+                        <th class="col-2">Status</th>
+                        <th class="col-1"></th>
+                    </tr>
+                </thead>
+                <tbody *ngFor="let server of appState.appData?.data?.servers" class="container">
+                    <tr class="row">
+                        <td class="col-1"><img [src]="apiUrl + server.imageUrl" width="40px" height="40px"
+                                [alt]="server.name" /></td>
+                        <td class="col-2">{{ server.name }}</td>
+                        <td class="col-3">{{ server.ipAddress }}</td>
+                        <td class="col-2">{{ server.type }}</td>
+                        <td class="col-1">{{ server.memory }}</td>
+                        <td class="col-2"><span class = "badge rounded-pill" [ngClass]="server.status.toString() == 'SERVER_UP' ? 'bg-success' : 'bg-warning'">{{ server.status.toString() | clean }}</span></td>
+                        <td class="col-1 tooltip-grp">
+
+                            <button class="btn btn-primary tooltip-btn"><i class="bi bi-three-dots-vertical"></i></button>
+
+                            <div class="btn-group-vertical tooltip-dropdown">
+                                <a type="button" class="btn btn-secondary" (click)="ping(server.ipAddress)">
+                                    <span>Ping  <i [ngClass]="((address$ | async) === server.ipAddress) ? 'spinner-border' : ['bi', 'bi-router', 'text-primary']"></i></span>
+                                </a>
+                                <a type="button" class="btn btn-secondary">
+                                    <span>Edit <i [ngClass]="false? 'spinner-border' : ['bi', 'bi-pencil', 'text-info']"></i></span>
+                                </a>
+                                <a type="button" class="btn btn-secondary">
+                                    <span>Remove <i [ngClass]="false? 'spinner-border' : ['bi', 'bi-trash', 'text-danger']"></i></span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ng-container>
+    <ng-container *ngSwitchCase="'ERROR_STATE'">
+        <div class="col-12 text-danger fs-5">
+            {{appState.error}}
+        </div>
+    </ng-container>
+</ng-container>
