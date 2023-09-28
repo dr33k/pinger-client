@@ -17,7 +17,7 @@
                         <th class="col-1"></th>
                     </tr>
                 </thead>
-                <tbody *ngFor="let server of appState.appData?.data?.servers" class="container">
+                <tbody *ngFor="let server of appState.appData?.data?.servers; trackBy:identify" class="container">
                     <tr class="row">
                         <td class="col-1"><img [src]="apiUrl + server.imageUrl" width="40px" height="40px"
                                 [alt]="server.name" /></td>
@@ -25,20 +25,25 @@
                         <td class="col-3">{{ server.ipAddress }}</td>
                         <td class="col-2">{{ server.type }}</td>
                         <td class="col-1">{{ server.memory }}</td>
-                        <td class="col-2"><span class = "badge rounded-pill" [ngClass]="server.status.toString() == 'SERVER_UP' ? 'bg-success' : 'bg-warning'">{{ server.status.toString() | clean }}</span></td>
+                        <td class="col-2"><span 
+                            [ngClass]="(pingAddress.value == server.ipAddress)? 
+                            ['spinner-border', 'text-secondary']: server.status.toString() == 'SERVER_UP' ?
+                            ['badge', 'rounded-pill', 'bg-success'] : ['badge', 'rounded-pill', 'bg-warning']"
+                            >
+                            {{(pingAddress.value == server.ipAddress)? null :  (server.status.toString() | clean)}}</span></td>
                         <td class="col-1 tooltip-grp">
 
-                            <button class="btn btn-primary tooltip-btn"><i class="bi bi-three-dots-vertical"></i></button>
+                            <button class="btn tooltip-btn"><i class="bi bi-three-dots-vertical"></i></button>
 
                             <div class="btn-group-vertical tooltip-dropdown">
                                 <a type="button" class="btn btn-secondary" (click)="ping(server.ipAddress)">
-                                    <span>Ping  <i [ngClass]="((address$ | async) === server.ipAddress) ? 'spinner-border' : ['bi', 'bi-router', 'text-primary']"></i></span>
+                                    <span>Ping  <i class="bi bi-router text-secondary"></i></span>
                                 </a>
                                 <a type="button" class="btn btn-secondary">
-                                    <span>Edit <i [ngClass]="false? 'spinner-border' : ['bi', 'bi-pencil', 'text-info']"></i></span>
+                                    <span>Edit <i class="bi bi-pencil text-info"></i></span>
                                 </a>
                                 <a type="button" class="btn btn-secondary">
-                                    <span>Remove <i [ngClass]="false? 'spinner-border' : ['bi', 'bi-trash', 'text-danger']"></i></span>
+                                    <span>Remove <i class="bi bi-trash text-danger"></i></span>
                                 </a>
                             </div>
                         </td>

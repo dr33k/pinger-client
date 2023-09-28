@@ -61,7 +61,7 @@ export class ServerService {
         next(response: AppResponse) {
           return {
             ...response,
-            data: { servers: response.data.servers?.filter(s => s.status === status) },
+            data: { servers: this.filter(status, response.data.servers || []) },
             message: this.responseMessage(response.data.servers?.length || 0, status.toString())
           }
         },
@@ -72,6 +72,10 @@ export class ServerService {
           return length <= 0 ?
             `There are no servers with ${userxp}` :
             `Servers filtered by ${userxp}`;
+        },
+        filter(status: Status, servers: Server[]): Server[]{
+          if (status == Status.ALL) return servers;
+          else return servers.filter(s => s.status === status);
         }
 
       }

@@ -1,9 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, map, of, startWith } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, tap, startWith, catchError } from 'rxjs/operators';
 import { AppState } from '../interface/app_state';
 import { AppResponse } from '../interface/app_response';
 import { DataState } from '../enums/data.state.enum';
 import { ServerService } from '../service/server.service';
+import { Server } from '../interface/server';
+import { Status } from '../enums/status.enum';
 
 @Component({
   selector: 'app-table',
@@ -11,35 +14,72 @@ import { ServerService } from '../service/server.service';
   styleUrls: ['./table.component.css']
 })
 export class TableComponent {
-  public readonly apiUrl: string = "" ;
+  public readonly apiUrl: string = "";
 
-  appState$: Observable<AppState<AppResponse>> = of({dataState: DataState.LOADING_STATE});
-  pingSubject = new BehaviorSubject('');
-  address$: Observable<string> = this.pingSubject.asObservable();
+  appState$: Observable<AppState<AppResponse>> = of({ dataState: DataState.LOADING_STATE });
+  pingAddress = new BehaviorSubject<string>('');
+  responseSubject = new BehaviorSubject<AppResponse | null>(null);
 
-  constructor(private serverService: ServerService){
+  servers: Server[] = [];
+
+  constructor(private serverService: ServerService) {
     this.apiUrl = serverService.apiUrl;
   }
 
-  ngOnInit():void{
-    this.appState$ = <Observable<AppState<AppResponse>>> this.serverService.servers$
-    .pipe(
-      map(response =>{  return {dataState: DataState.LOADED_STATE, appData: response}}),
-      startWith({dataState: DataState.LOADING_STATE}),
-      catchError((error: string) => { return of({dataState: DataState.ERROR_STATE, error})})
-    );
+  identify(index: number, server: Server) {
+    return server.id;
   }
 
-  ping(ipAddress: string):void{
-    this.pingSubject.next(ipAddress);
+  ngOnInit(): void {
+    this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.servers$
+      .pipe(
+        tap(response => {
+          this.responseSubject.next(response);
+          this.servers = response.data.servers || [];
+        }),
+        map(response => { return { dataState: DataState.LOADED_STATE, appData: response } }),
+        startWith({ dataState: DataState.LOADING_STATE }),
+        catchError((error: string) => { return of({ dataState: DataState.ERROR_STATE, error }) })
+      );
+  }
+
+  ping(ipAddress: string): void {
+    this.pingAddress.next(ipAddress);
+    var filtered = this.servers.find((s) => s.ipAddress == ipAddress);
 
     this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.ping$(ipAddress)
-    .pipe(
-      map(response => { return {dataState: DataState.LOADED_STATE, appData: response}}),
-      startWith({dataState: DataState.LOADING_STATE}),
-      catchError( (error: string) =>{return of({dataState: DataState.ERROR_STATE, error})})
-    );
+      .pipe(
+        map(pingResponse => {
+          (<Server>filtered).status = <Status>pingResponse.data.server?.status;
+          return {
+            dataState: DataState.LOADED_STATE,
+            appData: {
+              ...pingResponse,
+              data: {
+                servers: this.servers
+              }
+            }
+          }
+
+        }),
+        startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value }),
+        tap(()=>{this.pingAddress.next('')}),
+        catchError((error: string) => { return of({ dataState: DataState.ERROR_STATE, error }) })
+      );
+
   }
 
+  filter(status: Status): void {
+    this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.filter$(status, <AppResponse> this.responseSubject.value)
+      .pipe(
+        tap(response => {
+          this.responseSubject.next(response);
+          this.servers = response.data.servers || [];
+        }),
+        map(response => { return { dataState: DataState.LOADED_STATE, appData: response } }),
+        startWith({ dataState: DataState.LOADING_STATE }),
+        catchError((error: string) => { return of({ dataState: DataState.ERROR_STATE, error }) })
+      );
+  }
 
 }
