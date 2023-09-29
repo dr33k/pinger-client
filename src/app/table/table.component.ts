@@ -19,11 +19,13 @@ export class TableComponent {
   appState$: Observable<AppState<AppResponse>> = of({ dataState: DataState.LOADING_STATE });
   pingAddress = new BehaviorSubject<string>('');
   responseSubject = new BehaviorSubject<AppResponse | null>(null);
+  currentFilterStatus: Status;
 
   servers: Server[] = [];
 
   constructor(private serverService: ServerService) {
     this.apiUrl = serverService.apiUrl;
+    this.currentFilterStatus = Status.ALL;
   }
 
   identify(index: number, server: Server) {
@@ -45,39 +47,33 @@ export class TableComponent {
 
   ping(ipAddress: string): void {
     this.pingAddress.next(ipAddress);
-    var filtered = this.servers.find((s) => s.ipAddress == ipAddress);
+    var filteredServer = this.servers.find((s) => s.ipAddress == ipAddress);
 
     this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.ping$(ipAddress)
       .pipe(
         map(pingResponse => {
-          (<Server>filtered).status = <Status>pingResponse.data.server?.status;
+          (<Server>filteredServer).status = <Status>pingResponse.data.server?.status;
+
+          pingResponse.data.servers = this.servers;
+          this.pingAddress.next('');
+
           return {
             dataState: DataState.LOADED_STATE,
-            appData: {
-              ...pingResponse,
-              data: {
-                servers: this.servers
-              }
-            }
+            appData: pingResponse
           }
-
         }),
-        startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value }),
-        tap(()=>{this.pingAddress.next('')}),
+        startWith({ dataState: DataState.LOADED_STATE, servers: this.servers }),
         catchError((error: string) => { return of({ dataState: DataState.ERROR_STATE, error }) })
       );
-
   }
 
   filter(status: Status): void {
+    this.currentFilterStatus = status;
     this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.filter$(status, <AppResponse> this.responseSubject.value)
       .pipe(
-        tap(response => {
-          this.responseSubject.next(response);
-          this.servers = response.data.servers || [];
-        }),
-        map(response => { return { dataState: DataState.LOADED_STATE, appData: response } }),
-        startWith({ dataState: DataState.LOADING_STATE }),
+        tap(filterResponse => {this.servers = filterResponse.data.servers || []}),
+        map(filterResponse => { return { dataState: DataState.LOADED_STATE, appData: filterResponse } }),
+        startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value}),
         catchError((error: string) => { return of({ dataState: DataState.ERROR_STATE, error }) })
       );
   }

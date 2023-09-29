@@ -7,7 +7,7 @@
             <i class="bi bi-plus-circle"></i>
         </a>
         <span class="col-12 col-md m-2 dropdown p-0">
-            <select class="btn btn-primary dropdown-toggle w-100" name="filter" aria-label="FILTER BY STATUS"
+            <select #selectstatus (ngModelChange)="emit(selectstatus.value)" ngModel="ALL" class="btn btn-primary dropdown-toggle w-100" name="filter" aria-label="FILTER BY STATUS"
                 aria-haspopup="listbox">
                 <option class="dropdown-item" value="ALL">ALL</option>
                 <option class="dropdown-item" value="SERVER_UP">SERVER UP</option>

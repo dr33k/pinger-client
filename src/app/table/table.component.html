@@ -1,3 +1,5 @@
+<app-actions (filterStatusEvent)="filter($event)"></app-actions>
+
 <ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState.toString()">
     <ng-container *ngSwitchCase="'LOADING_STATE'">
         <div class="spinner-border text-info text-center"></div>
@@ -17,7 +19,7 @@
                         <th class="col-1"></th>
                     </tr>
                 </thead>
-                <tbody *ngFor="let server of appState.appData?.data?.servers; trackBy:identify" class="container">
+                <tbody *ngFor="let server of (appState.appData?.data?.servers || appState.servers); trackBy:identify" class="container">
                     <tr class="row">
                         <td class="col-1"><img [src]="apiUrl + server.imageUrl" width="40px" height="40px"
                                 [alt]="server.name" /></td>

@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subscriber, of, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, map } from 'rxjs/operators';
 import { AppResponse } from '../interface/app_response';
 import { Server } from '../interface/server';
 import { Status } from '../enums/status.enum';
@@ -53,37 +53,24 @@ export class ServerService {
 
   filter$: (status: Status, response: AppResponse) => Observable<AppResponse>
     = (status: Status, response: AppResponse) => {
-      console.log(response);
-
-      const source: Observable<AppResponse> = of(response);
-
-      const subscriber = {
-        next(response: AppResponse) {
-          return {
+      const source: Observable<AppResponse> = new Observable(
+          subscriber=>{
+          const filterResponse = {
             ...response,
-            data: { servers: this.filter(status, response.data.servers || []) },
+            data: {servers: this.filter(status, response.data?.servers || [])},
             message: this.responseMessage(response.data.servers?.length || 0, status.toString())
           }
-        },
-        error(response: AppResponse) { },
-        complete() { },
-        responseMessage(length: number, status: string): string {
-          const userxp = status.replaceAll('_', ' ');
-          return length <= 0 ?
-            `There are no servers with ${userxp}` :
-            `Servers filtered by ${userxp}`;
-        },
-        filter(status: Status, servers: Server[]): Server[]{
-          if (status == Status.ALL) return servers;
-          else return servers.filter(s => s.status === status);
-        }
 
-      }
-      source.subscribe(subscriber);
+          subscriber.next(filterResponse);
+          subscriber.complete();
+        }
+      );
+
+      source.subscribe();
 
       return source
         .pipe(
-          tap(console.log),
+          tap(()=>console.log(response)),
           catchError(this.handleError)
         );
     }
@@ -91,5 +78,17 @@ export class ServerService {
   handleError(err: HttpErrorResponse): Observable<never> {
     console.log(err);
     return throwError(`Error occurred \nCode: ${err.status}\nMessage: ${err.message}`)
+  }
+
+  responseMessage(length: number, status: string): string {
+    const userxp = status.replaceAll('_', ' ');
+    return length <= 0 ?
+      `There are no servers with ${userxp}` :
+      `Servers filtered by ${userxp}`;
+  }
+  
+  filter(status: Status, servers: Server[]): Server[]{
+    if (status == Status.ALL) return servers;
+    else return servers.filter(s => s.status === status);
   }
 }

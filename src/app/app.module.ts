@@ -8,6 +8,7 @@ import { Clean } from './pipes/clean.pipe';
 import { TableComponent } from './table/table.component';
 import { ActionsComponent } from './actions/actions.component';
 import { SearchComponent } from './search/search.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { SearchComponent } from './search/search.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    FormsModule,
     HttpClientModule
   ],
   providers: [],
