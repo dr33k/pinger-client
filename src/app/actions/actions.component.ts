@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Status } from '../enums/status.enum';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-actions',
@@ -16,12 +17,20 @@ export class ActionsComponent {
 
   @Output()
   public filterStatusEvent: EventEmitter<Status> = new EventEmitter();
-
-  emit(s: string) {
+  @Output()
+  public formSubmitEvent: EventEmitter<NgForm> = new EventEmitter();
+  @Input()
+  public loading: boolean = false;
+  
+  filterStatusEmit(s: string) {
     switch(s){
       case "ALL": this.filterStatusEvent.emit(Status.ALL);break;
       case "SERVER_UP": this.filterStatusEvent.emit(Status.SERVER_UP);break;
       case "SERVER_DOWN": this.filterStatusEvent.emit(Status.SERVER_DOWN);break;
-    }    
+    }  
+  }
+
+  formSubmitEmit(form: NgForm){
+    this.formSubmitEvent.emit(form);
   }
 }

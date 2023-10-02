@@ -1,4 +1,4 @@
-<app-actions (filterStatusEvent)="filter($event)"></app-actions>
+<app-actions (filterStatusEvent)="filter($event)" (formSubmitEvent)="save($event)" [loading]="isLoading.value"></app-actions>
 
 <ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState.toString()">
     <ng-container *ngSwitchCase="'LOADING_STATE'">

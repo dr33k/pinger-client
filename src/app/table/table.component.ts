@@ -7,6 +7,7 @@ import { DataState } from '../enums/data.state.enum';
 import { ServerService } from '../service/server.service';
 import { Server } from '../interface/server';
 import { Status } from '../enums/status.enum';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-table',
@@ -19,6 +20,7 @@ export class TableComponent {
   appState$: Observable<AppState<AppResponse>> = of({ dataState: DataState.LOADING_STATE });
   pingAddress = new BehaviorSubject<string>('');
   responseSubject = new BehaviorSubject<AppResponse | null>(null);
+  isLoading = new BehaviorSubject<boolean>(false);
   currentFilterStatus: Status;
 
   servers: Server[] = [];
@@ -75,6 +77,26 @@ export class TableComponent {
         map(filterResponse => { return { dataState: DataState.LOADED_STATE, appData: filterResponse } }),
         startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value}),
         catchError((error: string) => { return of({ dataState: DataState.ERROR_STATE, error }) })
+      );
+  }
+
+  save(serverForm: NgForm): void{
+    this.isLoading.next(true);
+
+    this.appState$ = <Observable<AppState<AppResponse>>> this.serverService.save$(serverForm.value as Server)
+    .pipe(
+      map((saveResponse)=>{
+        this.servers.push(saveResponse.data.server as Server);
+        saveResponse.data.servers = this.servers;
+        this.isLoading.next(false);
+
+        return {dataState: DataState.LOADED_STATE, appData: saveResponse}
+      }),
+      startWith({dataState: DataState.LOADING_STATE, appData: this.responseSubject.value}),
+      tap(appState=>this.responseSubject.next(appState.appData)),
+      catchError((error: string) => { 
+        this.isLoading.next(false);
+        return of({ dataState: DataState.ERROR_STATE, error }) })
       );
   }
 
