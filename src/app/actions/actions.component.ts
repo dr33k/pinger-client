@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Status } from '../enums/status.enum';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { NgForm } from '@angular/forms';
 
 @Component({
@@ -32,5 +31,6 @@ export class ActionsComponent {
 
   formSubmitEmit(form: NgForm){
     this.formSubmitEvent.emit(form);
+  
   }
 }

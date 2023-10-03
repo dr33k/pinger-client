@@ -17,6 +17,9 @@ import { NgForm } from '@angular/forms';
 export class TableComponent {
   public readonly apiUrl: string = "";
 
+  Status = Status;
+  DataState = DataState;
+
   appState$: Observable<AppState<AppResponse>> = of({ dataState: DataState.LOADING_STATE });
   pingAddress = new BehaviorSubject<string>('');
   responseSubject = new BehaviorSubject<AppResponse | null>(null);
@@ -33,7 +36,6 @@ export class TableComponent {
   identify(index: number, server: Server) {
     return server.id;
   }
-
   ngOnInit(): void {
     this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.servers$
       .pipe(
@@ -93,10 +95,29 @@ export class TableComponent {
         return {dataState: DataState.LOADED_STATE, appData: saveResponse}
       }),
       startWith({dataState: DataState.LOADING_STATE, appData: this.responseSubject.value}),
-      tap(appState=>this.responseSubject.next(appState.appData)),
+      tap(
+        appState=>{
+          this.responseSubject.next(appState.appData);
+          document.getElementById("dismissAddServerModal")?.click();
+          serverForm.resetForm({status: Status.SERVER_DOWN});
+        }),
       catchError((error: string) => { 
         this.isLoading.next(false);
         return of({ dataState: DataState.ERROR_STATE, error }) })
+      );
+  }
+
+  delete(server: Server): void{
+    this.appState$ = <Observable<AppState<AppResponse>>> this.serverService.delete$(server.id)
+    .pipe(
+      map((deleteResponse)=>{
+        this.servers = this.servers.filter(s=> s.id !== server.id);
+        deleteResponse.data.servers = this.servers;
+        return {dataState: DataState.LOADED_STATE, appData: deleteResponse}
+      }),
+      startWith({dataState: DataState.LOADING_STATE, appData: this.responseSubject.value}),
+      tap(appState=>this.responseSubject.next(appState.appData)),
+      catchError((error: string) => { return of({ dataState: DataState.ERROR_STATE, error }) })
       );
   }
 

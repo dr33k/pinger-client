@@ -44,7 +44,7 @@ export class ServerService {
 
   delete$: (id: number) => Observable<AppResponse>
     = (id: number) => {
-      return this.http.delete<AppResponse>(`${this.apiUrl}servers/delete/${id}`)
+      return this.http.delete<AppResponse>(`${this.apiUrl}servers/${id}`)
         .pipe(
           tap(console.log),
           catchError(this.handleError)
