@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, tap, startWith, catchError } from 'rxjs/operators';
 import { AppState } from '../interface/app_state';
@@ -12,7 +12,8 @@ import { NgForm } from '@angular/forms';
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
-  styleUrls: ['./table.component.css']
+  styleUrls: ['./table.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableComponent {
   public readonly apiUrl: string = "";
@@ -115,10 +116,24 @@ export class TableComponent {
         deleteResponse.data.servers = this.servers;
         return {dataState: DataState.LOADED_STATE, appData: deleteResponse}
       }),
-      startWith({dataState: DataState.LOADING_STATE, appData: this.responseSubject.value}),
+      startWith({dataState: DataState.LOADED_STATE, appData: this.responseSubject.value}),
       tap(appState=>this.responseSubject.next(appState.appData)),
       catchError((error: string) => { return of({ dataState: DataState.ERROR_STATE, error }) })
       );
+  }
+
+  print():void{
+    var datatype = "application/pdf";
+    var table = document.getElementById("servers");
+    var tableHtml = table?.outerHTML.replace(/ /g, "%20");
+    var link = document.createElement("a");
+    link.download = "servers.pdf";
+    link.href = `data:${datatype}, ${tableHtml}`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
   }
 
 }

@@ -1,23 +1,22 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { Status } from '../enums/status.enum';
 import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-actions',
   templateUrl: './actions.component.html',
-  styleUrls: ['./actions.component.css']
+  styleUrls: ['./actions.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ActionsComponent {
-  addServerDialogVisible: boolean = false;
-
-  showAddServerDialog() { this.addServerDialogVisible = true; }
-
   Status = Status;
 
   @Output()
   public filterStatusEvent: EventEmitter<Status> = new EventEmitter();
   @Output()
   public formSubmitEvent: EventEmitter<NgForm> = new EventEmitter();
+  @Output()
+  public printEvent: EventEmitter<boolean> = new EventEmitter();
   @Input()
   public loading: boolean = false;
   
@@ -31,6 +30,9 @@ export class ActionsComponent {
 
   formSubmitEmit(form: NgForm){
     this.formSubmitEvent.emit(form);
-  
+  }
+
+  printEmit(){
+    this.printEvent.emit()
   }
 }
