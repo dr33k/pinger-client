@@ -27,6 +27,7 @@ export class TableComponent {
   pingAddress = new BehaviorSubject<string>('');
   responseSubject = new BehaviorSubject<AppResponse | null>(null);
   isLoading = new BehaviorSubject<boolean>(false);
+  isNewServer = new BehaviorSubject<boolean>(false);
   currentFilterStatus: Status;
 
   servers: Server[] = [];
@@ -61,7 +62,7 @@ export class TableComponent {
       .pipe(
         tap(pingResponse=> this.notifier?.default(pingResponse.message)),
         map(pingResponse => {
-          (<Server>filteredServer).status = <Status>pingResponse.data.server?.status;
+          (<Server>filteredServer).status = pingResponse.data.server?.status as Status;
 
           pingResponse.data.servers = this.servers;
           this.pingAddress.next('');
@@ -72,6 +73,7 @@ export class TableComponent {
           }
         }),
         startWith({ dataState: DataState.LOADED_STATE, servers: this.servers }),
+        tap(()=> this.isNewServer.next(true)),
         catchError((error: string) => { 
           this.notifier?.warning("Oops, something went wrong");
           return of({ dataState: DataState.ERROR_STATE, error }) })

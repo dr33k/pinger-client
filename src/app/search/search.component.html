@@ -1,7 +1,7 @@
 <div class="col col-md-5 mb-5 container-fluid">
     <form class="d-flex">
-        <input class="form-control" type="search" placeholder="192.168.0.0"
+        <input #address class="form-control" type="search" placeholder="192.168.0.0"
             aria-placeholder="Insert Ip Address" />
-        <button class="btn btn-primary" type="submit">ping</button>
+        <button class="btn btn-primary" type="submit" (click)="ipAddressEmit(address.value)">ping</button>
     </form>
 </div>

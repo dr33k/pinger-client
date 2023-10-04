@@ -1,3 +1,5 @@
+<app-search (ipAddressEvent)="ping($event)"></app-search>
+
 <app-actions (filterStatusEvent)="filter($event)" (formSubmitEvent)="save($event)"  (printEvent)="print()" [loading]="isLoading.value"></app-actions>
 
 <ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState">
