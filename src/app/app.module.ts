@@ -9,6 +9,8 @@ import { TableComponent } from './table/table.component';
 import { ActionsComponent } from './actions/actions.component';
 import { SearchComponent } from './search/search.component';
 import { FormsModule } from '@angular/forms';
+import { NotificationModule } from './notification/notification.module';
+import { ServerService } from './service/server.service';
 
 @NgModule({
   declarations: [
@@ -22,9 +24,10 @@ import { FormsModule } from '@angular/forms';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    NotificationModule
   ],
-  providers: [],
+  providers: [ServerService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
