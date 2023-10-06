@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, tap, last, startWith, catchError } from 'rxjs/operators';
 import { AppState } from '../interface/app_state';
@@ -27,9 +27,8 @@ export class TableComponent {
   pingAddress = new BehaviorSubject<string>('');
   responseSubject = new BehaviorSubject<AppResponse | null>(null);
   isLoading = new BehaviorSubject<boolean>(false);
-  isNewServer = new BehaviorSubject<boolean>(false);
-  currentFilterStatus: Status;
 
+  currentFilterStatus: Status;
   servers: Server[] = [];
 
   constructor(private serverService: ServerService, notifier: NotificationService) {
@@ -60,89 +59,103 @@ export class TableComponent {
 
     this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.ping$(ipAddress)
       .pipe(
-        tap(pingResponse=> this.notifier?.default(pingResponse.message)),
+        tap(pingResponse => {
+          this.notifier?.default(pingResponse.message);
+        }),
         map(pingResponse => {
-          (<Server>filteredServer).status = pingResponse.data.server?.status as Status;
+          if (filteredServer) {
+            (<Server>filteredServer).status = pingResponse.data.server?.status as Status;
 
-          pingResponse.data.servers = this.servers;
-          this.pingAddress.next('');
+            pingResponse.data.servers = this.servers;
+            this.pingAddress.next('');
 
-          return {
-            dataState: DataState.LOADED_STATE,
-            appData: pingResponse
+            return {
+              dataState: DataState.LOADED_STATE,
+              appData: pingResponse
+            }
+          }
+          else {
+            if(pingResponse.data.server?.status == Status.SERVER_UP) document.getElementById("addServerQueryButton")?.click();
+            return {
+              dataState: DataState.LOADED_STATE,
+              servers: this.servers
+            }
           }
         }),
         startWith({ dataState: DataState.LOADED_STATE, servers: this.servers }),
-        tap(()=> this.isNewServer.next(true)),
-        catchError((error: string) => { 
+        catchError((error: string) => {
           this.notifier?.warning("Oops, something went wrong");
-          return of({ dataState: DataState.ERROR_STATE, error }) })
+          return of({ dataState: DataState.ERROR_STATE, error })
+        })
       );
   }
 
   filter(status: Status): void {
     this.currentFilterStatus = status;
-    this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.filter$(status, <AppResponse> this.responseSubject.value)
+    this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.filter$(status, <AppResponse>this.responseSubject.value)
       .pipe(
         tap(filterResponse => {
           this.servers = filterResponse.data.servers || [];
           this.notifier?.default(filterResponse.message);
         }),
         map(filterResponse => { return { dataState: DataState.LOADED_STATE, appData: filterResponse } }),
-        startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value}),
-        catchError((error: string) => { 
+        startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value }),
+        catchError((error: string) => {
           this.notifier?.warning("Oops, something went wrong");
-          return of({ dataState: DataState.ERROR_STATE, error }) })
+          return of({ dataState: DataState.ERROR_STATE, error })
+        })
       );
   }
 
-  save(serverForm: NgForm): void{
+  save(serverForm: NgForm): void {
     this.isLoading.next(true);
 
-    this.appState$ = <Observable<AppState<AppResponse>>> this.serverService.save$(serverForm.value as Server)
-    .pipe(
-      tap(saveResponse=>this.notifier?.success(saveResponse.message as string)),
-      map((saveResponse)=>{
-        this.servers.push(saveResponse.data.server as Server);
-        saveResponse.data.servers = this.servers;
-        this.isLoading.next(false);
+    this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.save$(serverForm.value as Server)
+      .pipe(
+        tap(saveResponse => this.notifier?.success(saveResponse.message as string)),
+        map((saveResponse) => {
+          this.servers.push(saveResponse.data.server as Server);
+          saveResponse.data.servers = this.servers;
+          this.isLoading.next(false);
 
-        return {dataState: DataState.LOADED_STATE, appData: saveResponse}
-      }),
-      startWith({dataState: DataState.LOADING_STATE, appData: this.responseSubject.value}),
-      tap(
-        appState=>{
-          this.responseSubject.next(appState.appData);
-          document.getElementById("dismissAddServerModal")?.click();
-          serverForm.resetForm({status: Status.SERVER_DOWN});
+          return { dataState: DataState.LOADED_STATE, appData: saveResponse }
         }),
-      catchError((error: string) => { 
-        this.isLoading.next(false);
-        this.notifier?.warning("Oops, something went wrong");
-        return of({ dataState: DataState.ERROR_STATE, error }) })
+        startWith({ dataState: DataState.LOADING_STATE, appData: this.responseSubject.value }),
+        tap(
+          appState => {
+            this.responseSubject.next(appState.appData);
+            document.getElementById("dismissAddServerModal")?.click();
+            serverForm.resetForm({ status: Status.SERVER_DOWN });
+          }),
+        catchError((error: string) => {
+          this.isLoading.next(false);
+          this.notifier?.warning("Oops, something went wrong");
+          return of({ dataState: DataState.ERROR_STATE, error })
+        })
       );
   }
 
-  delete(server: Server): void{
-    this.appState$ = <Observable<AppState<AppResponse>>> this.serverService.delete$(server.id)
-    .pipe(
-      tap(deleteResponse=>this.notifier?.default(deleteResponse.message as string)),
-      map((deleteResponse)=>{
-        this.servers = this.servers.filter(s=> s.id !== server.id);
-        deleteResponse.data.servers = this.servers;
-        return {dataState: DataState.LOADED_STATE, appData: deleteResponse}
-      }),
-      startWith({dataState: DataState.LOADED_STATE, appData: this.responseSubject.value}),
-      tap(appState=>{
-        this.responseSubject.next(appState.appData);
-    }),
-      catchError((error: string) => { 
-        this.notifier?.warning("Oops, something went wrong");
-        return of({ dataState: DataState.ERROR_STATE, error }) })
+  delete(server: Server): void {
+    this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.delete$(server.id)
+      .pipe(
+        tap(deleteResponse => this.notifier?.default(deleteResponse.message as string)),
+        map((deleteResponse) => {
+          this.servers = this.servers.filter(s => s.id !== server.id);
+          deleteResponse.data.servers = this.servers;
+          return { dataState: DataState.LOADED_STATE, appData: deleteResponse }
+        }),
+        startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value }),
+        tap(appState => {
+          this.responseSubject.next(appState.appData);
+        }),
+        catchError((error: string) => {
+          this.notifier?.warning("Oops, something went wrong");
+          return of({ dataState: DataState.ERROR_STATE, error })
+        })
       );
   }
 
-  print():void{
+  print(): void {
     var datatype = "application/pdf";
     var table = document.getElementById("servers");
     var tableHtml = table?.outerHTML.replace(/ /g, "%20");
@@ -156,5 +169,4 @@ export class TableComponent {
     link.click();
     document.body.removeChild(link);
   }
-
 }

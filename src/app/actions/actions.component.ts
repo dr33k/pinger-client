@@ -16,10 +16,13 @@ export class ActionsComponent {
   @Output()
   public formSubmitEvent: EventEmitter<NgForm> = new EventEmitter();
   @Output()
-  public printEvent: EventEmitter<boolean> = new EventEmitter();
+  public printEvent: EventEmitter<boolean> = new EventEmitter();  
   @Input()
   public loading: boolean = false;
-  
+  @Input()
+  public queryOrForm?: 'QUERY'|'FORM';
+
+
   filterStatusEmit(s: string) {
     switch(s){
       case "ALL": this.filterStatusEvent.emit(Status.ALL);break;
@@ -34,5 +37,9 @@ export class ActionsComponent {
 
   printEmit(){
     this.printEvent.emit()
+  }
+
+  addServerQueryOrForm(value: 'QUERY'|'FORM'){
+    this.queryOrForm = value;
   }
 }
