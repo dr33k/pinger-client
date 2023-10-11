@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppRoutingModule } from './app-routing.module';
+import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
+
 import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http'
 import { Clean } from './pipes/clean.pipe';
 import { TableComponent } from './table/table.component';
 import { ActionsComponent } from './actions/actions.component';
@@ -25,7 +26,8 @@ import { ServerService } from './service/server.service';
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
-    NotificationModule
+    NotificationModule,
+    ReactiveFormsModule
   ],
   providers: [ServerService],
   bootstrap: [AppComponent]

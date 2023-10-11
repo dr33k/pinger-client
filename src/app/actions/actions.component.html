@@ -56,25 +56,25 @@
                         <span aria-hidden="true"></span>
                     </button>
                 </div>
-                <form #serverForm="ngForm" (ngSubmit)="formSubmitEmit(serverForm)">
+                <form [formGroup]="addServerForm" (ngSubmit)="formSubmitEmit()">
 
                     <div class="modal-body">
                         <div class="form-group">
                             <div class="form-floating mb-3">
-                                <input ngModel id="ipAddress" name="ipAddress" class="form-control" required="true"
+                                <input formControlName="ipAddress" id="ipAddress" name="ipAddress" class="form-control" required="true"
                                     placeholder="IP Address" />
                                 <label aria-label="IP Address" for="ipAddress">IP</label>
                             </div>
 
                             <div class="form-floating mb-3">
-                                <input ngModel id="name" name="name" class="form-control" required placeholder="Name" />
+                                <input formControlName="name" id="name" name="name" class="form-control" required placeholder="Name" />
                                 <label aria-label="Server Name" for="name">Name</label>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <input ngModel id="memory" name="memory" class="form-control" required
+                                    <input formControlName="memory" id="memory" name="memory" class="form-control" required
                                         placeholder="Memory eg 10GB" />
                                     <label aria-label="Memory" for="memory">Memory</label>
                                 </div>
@@ -82,7 +82,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <input ngModel id="type" name="type" class="form-control" required
+                                    <input formControlName="type" id="type" name="type" class="form-control" required
                                         placeholder="Type" />
                                     <label aria-label="Type" for="type">Type</label>
                                 </div>
@@ -90,10 +90,10 @@
                         </div>
 
                         <div class="form-floating mb-3">
-                            <select ngModel="SERVER_DOWN" id="modal-select-status" name="status"
+                            <select formControlName="status" id="modal-select-status" name="status"
                                 class="form-control dropdown dropdown-toggle" required>
                                 <option class="dropdown-item" value="SERVER_UP">SERVER UP</option>
-                                <option class="dropdown-item" value="SERVER_DOWN">SERVER DOWN</option>
+                                <option class="dropdown-item" value="SERVER_DOWN" selected>SERVER DOWN</option>
                             </select>
                             <label aria-label="Status" for="modal-select-status">Status</label>
                         </div>
@@ -101,8 +101,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn"
-                            [ngClass]="serverForm.invalid ? 'btn-disabled' : !loading ? 'btn-primary' : ['btn-disabled', 'spinner-border']"
-                            [disabled]="serverForm.invalid || loading">{{!loading ?
+                            [ngClass]="addServerForm?.invalid ? 'btn-disabled' : !loading ? 'btn-primary' : ['btn-disabled', 'spinner-border']"
+                            [disabled]="addServerForm?.invalid || loading">{{!loading ?
                             'Save' : 'Saving...'}}</button>
                         <button id="dismissAddServerModal" type="button" class="btn btn-secondary"
                             data-bs-dismiss="modal">Close</button>

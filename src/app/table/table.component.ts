@@ -7,7 +7,7 @@ import { DataState } from '../enums/data.state.enum';
 import { ServerService } from '../service/server.service';
 import { Server } from '../interface/server';
 import { Status } from '../enums/status.enum';
-import { NgForm } from '@angular/forms';
+import { FormGroup, NgForm } from '@angular/forms';
 import { NotificationService } from '../service/notification.service';
 
 @Component({
@@ -108,7 +108,7 @@ export class TableComponent {
       );
   }
 
-  save(serverForm: NgForm): void {
+  save(serverForm: FormGroup): void {
     this.isLoading.next(true);
 
     this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.save$(serverForm.value as Server)
@@ -126,7 +126,7 @@ export class TableComponent {
           appState => {
             this.responseSubject.next(appState.appData);
             document.getElementById("dismissAddServerModal")?.click();
-            serverForm.resetForm({ status: Status.SERVER_DOWN });
+            serverForm.get('status')?.setValue(Status.SERVER_DOWN);
             this.currentFilterStatus.next(Status.ALL);
           }),
         catchError((error: string) => {
