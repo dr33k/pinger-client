@@ -9,12 +9,12 @@
         <a type="button"  id="addServerQueryButton" href="#addServer" data-bs-toggle="modal" (click)="addServerQueryOrForm('QUERY')" hidden ></a>
         
         <span class="col-12 col-md m-2 dropdown p-0">
-            <select #selectstatus (ngModelChange)="filterStatusEmit(selectstatus.value)" ngModel="ALL"
+            <select #selectstatus (ngModelChange)="filterStatusEmit(selectstatus.value)" [ngModel]="currentFilterStatus"
                 class="btn btn-primary dropdown-toggle w-100" name="filter" aria-label="FILTER BY STATUS"
                 aria-haspopup="listbox">
-                <option class="dropdown-item" value="ALL">ALL</option>
-                <option class="dropdown-item" value="SERVER_UP">SERVER UP</option>
-                <option class="dropdown-item" value="SERVER_DOWN">SERVER DOWN</option>
+                <option class="dropdown-item" [selected]="currentFilterStatus==Status.ALL" value="ALL">ALL</option>
+                <option class="dropdown-item" [selected]="currentFilterStatus==Status.SERVER_UP" value="SERVER_UP">SERVER UP</option>
+                <option class="dropdown-item" [selected]="currentFilterStatus==Status.SERVER_DOWN" value="SERVER_DOWN">SERVER DOWN</option>
             </select>
         </span>
         <button class="col-12 col-md m-2 btn btn-primary" aria-label="Print Server Report" (click)="printEmit()">

@@ -27,13 +27,12 @@ export class TableComponent {
   pingAddress = new BehaviorSubject<string>('');
   responseSubject = new BehaviorSubject<AppResponse | null>(null);
   isLoading = new BehaviorSubject<boolean>(false);
+  currentFilterStatus = new BehaviorSubject<Status>(Status.ALL);
 
-  currentFilterStatus: Status;
-  servers: Server[] = [];
+  readonly servers: Array<Server> = new Array();
 
   constructor(private serverService: ServerService, notifier: NotificationService) {
     this.apiUrl = serverService.apiUrl;
-    this.currentFilterStatus = Status.ALL;
     this.notifier = notifier;
   }
 
@@ -45,7 +44,7 @@ export class TableComponent {
       .pipe(
         tap(response => {
           this.responseSubject.next(response);
-          this.servers = response.data.servers || [];
+          this.servers.splice(0,this.servers.length, ...response.data.servers || []);
         }),
         map(response => { return { dataState: DataState.LOADED_STATE, appData: response } }),
         startWith({ dataState: DataState.LOADING_STATE }),
@@ -68,6 +67,7 @@ export class TableComponent {
 
             pingResponse.data.servers = this.servers;
             this.pingAddress.next('');
+            
 
             return {
               dataState: DataState.LOADED_STATE,
@@ -91,17 +91,18 @@ export class TableComponent {
   }
 
   filter(status: Status): void {
-    this.currentFilterStatus = status;
+    this.currentFilterStatus.next(status);
     this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.filter$(status, <AppResponse>this.responseSubject.value)
       .pipe(
         tap(filterResponse => {
-          this.servers = filterResponse.data.servers || [];
+          this.servers.splice(0 ,this.servers.length, ...filterResponse.data.servers || []);
           this.notifier?.default(filterResponse.message);
         }),
         map(filterResponse => { return { dataState: DataState.LOADED_STATE, appData: filterResponse } }),
         startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value }),
         catchError((error: string) => {
           this.notifier?.warning("Oops, something went wrong");
+          console.log(error);          
           return of({ dataState: DataState.ERROR_STATE, error })
         })
       );
@@ -115,10 +116,10 @@ export class TableComponent {
         tap(saveResponse => this.notifier?.success(saveResponse.message as string)),
         map((saveResponse) => {
           this.servers.push(saveResponse.data.server as Server);
-          saveResponse.data.servers = this.servers;
+          this.responseSubject.value?.data.servers?.push(saveResponse.data.server as Server);
           this.isLoading.next(false);
 
-          return { dataState: DataState.LOADED_STATE, appData: saveResponse }
+          return { dataState: DataState.LOADED_STATE, appData: this.responseSubject.value }
         }),
         startWith({ dataState: DataState.LOADING_STATE, appData: this.responseSubject.value }),
         tap(
@@ -126,6 +127,7 @@ export class TableComponent {
             this.responseSubject.next(appState.appData);
             document.getElementById("dismissAddServerModal")?.click();
             serverForm.resetForm({ status: Status.SERVER_DOWN });
+            this.currentFilterStatus.next(Status.ALL);
           }),
         catchError((error: string) => {
           this.isLoading.next(false);
@@ -140,7 +142,7 @@ export class TableComponent {
       .pipe(
         tap(deleteResponse => this.notifier?.default(deleteResponse.message as string)),
         map((deleteResponse) => {
-          this.servers = this.servers.filter(s => s.id !== server.id);
+          this.servers.splice(0, this.servers.length, ...this.servers.filter(s => s.id !== server.id));
           deleteResponse.data.servers = this.servers;
           return { dataState: DataState.LOADED_STATE, appData: deleteResponse }
         }),

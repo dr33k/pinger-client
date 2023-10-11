@@ -20,6 +20,8 @@ export class ActionsComponent {
   @Input()
   public loading: boolean = false;
   @Input()
+  public currentFilterStatus: Status = Status.ALL;
+  @Input()
   public queryOrForm?: 'QUERY'|'FORM';
 
 

@@ -5,6 +5,7 @@
 (formSubmitEvent)="save($event)"  
 (printEvent)="print()" 
 [loading]="isLoading.value"
+[currentFilterStatus]="currentFilterStatus.value"
 ></app-actions>
 
 <ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState">
