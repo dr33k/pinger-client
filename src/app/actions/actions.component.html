@@ -101,8 +101,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn"
-                            [ngClass]="addServerForm?.invalid ? 'btn-disabled' : !loading ? 'btn-primary' : ['btn-disabled', 'spinner-border']"
-                            [disabled]="addServerForm?.invalid || loading">{{!loading ?
+                            [ngClass]="addServerForm.invalid ? 'btn-disabled' : !loading ? 'btn-primary' : ['btn-disabled', 'spinner-border']"
+                            [disabled]="addServerForm.invalid || loading">{{!loading ?
                             'Save' : 'Saving...'}}</button>
                         <button id="dismissAddServerModal" type="button" class="btn btn-secondary"
                             data-bs-dismiss="modal">Close</button>
