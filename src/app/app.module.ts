@@ -7,7 +7,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { Clean } from './pipes/clean.pipe';
 import { TableComponent } from './table/table.component';
-import { ActionsComponent } from './actions/actions.component';
 import { SearchComponent } from './search/search.component';
 import { FormsModule } from '@angular/forms';
 import { NotificationModule } from './notification/notification.module';
@@ -18,7 +17,6 @@ import { ServerService } from './service/server.service';
     AppComponent,
     Clean,
     TableComponent,
-    ActionsComponent,
     SearchComponent
     ],
   imports: [

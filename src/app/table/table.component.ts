@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, tap, last, startWith, catchError } from 'rxjs/operators';
+import { map, tap, startWith, catchError } from 'rxjs/operators';
 import { AppState } from '../interface/app_state';
 import { AppResponse } from '../interface/app_response';
 import { DataState } from '../enums/data.state.enum';
 import { ServerService } from '../service/server.service';
 import { Server } from '../interface/server';
 import { Status } from '../enums/status.enum';
-import { FormGroup, NgForm } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NotificationService } from '../service/notification.service';
 
 @Component({
@@ -19,6 +19,7 @@ import { NotificationService } from '../service/notification.service';
 export class TableComponent {
   public readonly apiUrl: string = "";
   public notifier?: NotificationService;
+  public addServerForm: FormGroup;
 
   Status = Status;
   DataState = DataState;
@@ -28,12 +29,22 @@ export class TableComponent {
   responseSubject = new BehaviorSubject<AppResponse | null>(null);
   isLoading = new BehaviorSubject<boolean>(false);
   currentFilterStatus = new BehaviorSubject<Status>(Status.ALL);
+  queryOrForm = new BehaviorSubject<'QUERY'|'FORM'>('QUERY');
 
   readonly servers: Array<Server> = new Array();
 
-  constructor(private serverService: ServerService, notifier: NotificationService) {
+  constructor(private serverService: ServerService, notifier: NotificationService,
+    fb: FormBuilder) {
     this.apiUrl = serverService.apiUrl;
     this.notifier = notifier;
+
+    this.addServerForm = fb.group({
+      ipAddress: ['', [Validators.required, Validators.pattern('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$')]],
+      name: ['', [Validators.required, Validators.min(3)]],
+      memory: ['', [Validators.required, Validators.min(3)]],
+      type: ['', [Validators.required, Validators.min(3)]],
+      status: [Status.SERVER_DOWN]
+    });
   }
 
   identify(index: number, server: Server) {
@@ -65,9 +76,7 @@ export class TableComponent {
           if (filteredServer) {
             (<Server>filteredServer).status = pingResponse.data.server?.status as Status;
 
-            pingResponse.data.servers = this.servers;
-            this.pingAddress.next('');
-            
+            pingResponse.data.servers = this.servers;     
 
             return {
               dataState: DataState.LOADED_STATE,
@@ -75,6 +84,7 @@ export class TableComponent {
             }
           }
           else {
+            this.addServerForm.get('ipAddress')?.setValue(ipAddress);
             if(pingResponse.data.server?.status == Status.SERVER_UP) document.getElementById("addServerQueryButton")?.click();
             return {
               dataState: DataState.LOADED_STATE,
@@ -82,6 +92,7 @@ export class TableComponent {
             }
           }
         }),
+        tap(()=>this.pingAddress.next('')),
         startWith({ dataState: DataState.LOADED_STATE, servers: this.servers }),
         catchError((error: string) => {
           this.notifier?.warning("Oops, something went wrong");
@@ -90,7 +101,14 @@ export class TableComponent {
       );
   }
 
-  filter(status: Status): void {
+  filter(s: string): void {
+    var status: Status = Status.ALL;
+    switch(s){
+      case "ALL": status = Status.ALL;break;
+      case "SERVER_UP": status = Status.SERVER_UP;break;
+      case "SERVER_DOWN": status = Status.SERVER_DOWN;break;
+    }  
+
     this.currentFilterStatus.next(status);
     this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.filter$(status, <AppResponse>this.responseSubject.value)
       .pipe(
@@ -108,14 +126,13 @@ export class TableComponent {
       );
   }
 
-  save(serverForm: FormGroup): void {
+  save(): void {
     this.isLoading.next(true);
 
-    this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.save$(serverForm.value as Server)
+    this.appState$ = <Observable<AppState<AppResponse>>>this.serverService.save$(this.addServerForm.value as Server)
       .pipe(
         tap(saveResponse => this.notifier?.success(saveResponse.message as string)),
         map((saveResponse) => {
-          this.servers.push(saveResponse.data.server as Server);
           this.responseSubject.value?.data.servers?.push(saveResponse.data.server as Server);
           this.isLoading.next(false);
 
@@ -126,7 +143,7 @@ export class TableComponent {
           appState => {
             this.responseSubject.next(appState.appData);
             document.getElementById("dismissAddServerModal")?.click();
-            serverForm.get('status')?.setValue(Status.SERVER_DOWN);
+            this.addServerForm.reset();
             this.currentFilterStatus.next(Status.ALL);
           }),
         catchError((error: string) => {
@@ -144,12 +161,10 @@ export class TableComponent {
         map((deleteResponse) => {
           this.servers.splice(0, this.servers.length, ...this.servers.filter(s => s.id !== server.id));
           deleteResponse.data.servers = this.servers;
-          return { dataState: DataState.LOADED_STATE, appData: deleteResponse }
+          this.responseSubject.next(deleteResponse);
+          return { dataState: DataState.LOADED_STATE, servers: this.servers }
         }),
         startWith({ dataState: DataState.LOADED_STATE, appData: this.responseSubject.value }),
-        tap(appState => {
-          this.responseSubject.next(appState.appData);
-        }),
         catchError((error: string) => {
           this.notifier?.warning("Oops, something went wrong");
           return of({ dataState: DataState.ERROR_STATE, error })
@@ -170,5 +185,9 @@ export class TableComponent {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  addServerQueryOrForm(value: 'QUERY'|'FORM'){
+    this.queryOrForm.next(value);
   }
 }
