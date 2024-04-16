@@ -5,4 +5,14 @@
 
 ### Run
 
-ng serve
+        npm install
+
+in any terminal (excluding powershell) then
+        
+        ng serve
+
+Start up the server "pinger", which can be found in my list of repositories.
+
+Or if you're just interested in this, visit
+
+http://localhost:4200
